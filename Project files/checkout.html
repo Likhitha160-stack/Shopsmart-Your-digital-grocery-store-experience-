@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🥬 Meg’s Market Checkout</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 30px;
+      background: linear-gradient(to right, #e9fdf0, #f0fcff);
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.5em;
+      color: #2a805f;
+      margin-bottom: 30px;
+    }
+    section {
+      display: none;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 500px;
+      margin: auto;
+      margin-bottom: 40px;
+    }
+    section.active { display: block; }
+
+    h2 {
+      color: #28a745;
+      font-size: 1.6em;
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 2px solid #d1e7dd;
+      border-radius: 8px;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #2a805f;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #23684c;
+    }
+    .emoji {
+      font-size: 1.4em;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🥕  Market Checkout 🧺</h1>
+
+<section id="cartSection" class="active">
+  <h2><span class="emoji">🛒</span>Your Cart</h2>
+  <div id="cartItems"></div>
+  <button onclick="showSection('addressSection')">➡️ Continue to Address</button>
+</section>
+
+<section id="addressSection">
+  <h2><span class="emoji">🏠</span>Delivery Address</h2>
+  <input id="name" placeholder="Full Name" required>
+  <input id="address" placeholder="Street Address" required>
+  <input id="city" placeholder="City" required>
+  <button onclick="saveAddress()">➡️ Continue to Payment</button>
+</section>
+
+<section id="paymentSection">
+  <h2><span class="emoji">💳</span>Payment</h2>
+  <select id="paymentMethod">
+    <option value="Cash on Delivery">💵 Cash on Delivery</option>
+    <option value="UPI">📲 UPI</option>
+    <option value="Credit Card">💳 Credit Card</option>
+  </select>
+  <button onclick="showSection('summarySection'); generateSummary();">➡️ Review Order</button>
+</section>
+
+<section id="summarySection">
+  <h2><span class="emoji">📦</span>Order Summary</h2>
+  <div id="summary"></div>
+  <button onclick="placeOrder()">🎉 Place Order</button>
+</section>
+
+<script>
+  // Mock cart (delete this in real app)
+  if (!localStorage.getItem("cart")) {
+    localStorage.setItem("cart", JSON.stringify([
+      { name: "🍅 Tomatoes", price: 40 },
+      { name: "🥛 Milk", price: 55 },
+      { name: "🥬 Spinach", price: 30 }
+    ]));
+  }
+
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  document.getElementById("cartItems").innerHTML = cart.map(
+    item => `<p>${item.name} – ₹${item.price}</p>`
+  ).join("");
+
+  function showSection(id) {
+    document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+  }
+
+  function saveAddress() {
+    const address = {
+      name: document.getElementById("name").value,
+      address: document.getElementById("address").value,
+      city: document.getElementById("city").value
+    };
+    localStorage.setItem("userAddress", JSON.stringify(address));
+    showSection("paymentSection");
+  }
+
+  function generateSummary() {
+    const address = JSON.parse(localStorage.getItem("userAddress"));
+    const payment = document.getElementById("paymentMethod").value;
+    const summary = `
+      <h3>🛍️ Items:</h3>
+      ${cart.map(i => `<p>${i.name} – ₹${i.price}</p>`).join("")}
+      <h3>📍 Delivery To:</h3>
+      <p>${address.name}, ${address.address}, ${address.city}</p>
+      <h3>💰 Payment:</h3>
+      <p>${payment}</p>
+    `;
+    document.getElementById("summary").innerHTML = summary;
+  }
+
+  function placeOrder() {
+    localStorage.clear();
+    document.body.innerHTML = `
+      <div style="text-align:center; padding:40px; font-family:sans-serif;">
+        <h1 style="font-size:2.8em; color:#2a805f;">🎊 Thank You for shopping with us! 🎉</h1>
+        <p style="font-size:1.3em;">Your veggies are dancing their way to you 🥦💃🚚</p>
+        <p style="font-size:1.1em; margin-top:30px;">Tracking your order...</p>
+        <div id="tracking" style="margin-top:20px; font-size:2em;">⏳</div>
+      </div>
+    `;
+    let steps = ["🧺 Preparing", "🥕 Packing", "🚚 Out for delivery", "🏡 Delivered!"];
+    let tracker = document.getElementById("tracking");
+    let index = 0;
+
+    let trackingInterval = setInterval(() => {
+      if (index < steps.length) {
+        tracker.innerText = steps[index++];
+      } else {
+        clearInterval(trackingInterval);
+        setTimeout(() => {
+          window.location.href = "homepage.html"; // Home page
+        }, 1500);
+      }
+    }, 1500);
+  }
+</script>
+
+</body>
+</html>
